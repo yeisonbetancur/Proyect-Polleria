@@ -1,4 +1,5 @@
 #include "auxfunc.h"
+#include "auxfunc.cpp"
 #include<iostream>
 #include<fstream>
 #include<ctime>

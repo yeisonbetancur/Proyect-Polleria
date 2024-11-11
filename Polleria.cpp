@@ -16,9 +16,6 @@ struct Expense{
 int main();
 void productMenu();
 
-
-
-
 void productMenu(){
 	int x;
 	cout<<"Este es el menu de manejo de las productos, ingresa un valor del 0 al tin segun lo que desees hacer";
