@@ -9,13 +9,13 @@
 using namespace std;
 
 bool checkBool(int x){
-    if(x!=1||x!=0){
+    if(x!=1&&x!=0){
         return false;
     }else return true;
 }
 
 bool discountCheck(int x){
-    if(x<100||x>0){
+    if(x<=99&&x>=0){
         return true;
     }else return false;
 }

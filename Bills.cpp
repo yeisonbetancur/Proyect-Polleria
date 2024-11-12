@@ -74,3 +74,37 @@ void addBill(){
 	cout<<"Factura Realizada con Exito\n";
 
 }
+
+Bill searchBillById(const char* id[]){
+    Bill bill={};
+    ifstream archivo("bills.dat", ios::binary);
+    if (!archivo) {
+        cerr << "Error al abrir el archivo." << endl;
+        return bill ;
+    }
+
+    while (archivo.read(reinterpret_cast<char*>(&bill), sizeof(Bill))) {
+        if (strcmp(bill.id, id) == 0) {
+            archivo.close();
+            return bill;
+        }
+    }
+    archivo.close();
+    return bill;
+}
+
+void readProductById(){
+  	char id[20];
+  	cout<<"Ingresa el ID ";
+  	cin.ignore(numeric_limits<streamsize>::max(), '\n');
+  	cin.getline(id,20);
+  	Bill bill=searchBillById(id);
+  	if(product.id[0] != '\0'&& strcmp(bill.id, id)==0){
+    	cout <<"\nProducto encontrado:\n";
+            cout <<"ID: "<<bill.id<<"\n";
+            cout <<"Fecha: "<<(1900+bill.date.tm_year)<<"/"<<bill.date.tm_mon<<"/"<<bill.date.tm_mday<<"/"<<bill.date.tm_hour<<"/"<<bill.date.tm_min<<"/"<<bill.date.tm_sec<<"\n";
+            cout <<"Precio: $"<<product.price<<"\n";
+        }else{
+        	cout<<"No se encontro el producto. con id; "<<id;
+		}
+	}

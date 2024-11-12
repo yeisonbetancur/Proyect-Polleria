@@ -39,7 +39,7 @@ Product searchProductByID(const char* id) {
             cout <<"Nombre: "<<product.name<<"\n";
             cout <<"Precio: $"<<product.price<<"\n";
         }else{
-        	cout<<"No se encontro el producto,"<<product.id[0];
+        	cout<<"No se encontro el producto. con id; "<<id;
 		}
 	}
 	

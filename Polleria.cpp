@@ -36,34 +36,6 @@ void productMenu(){
 }
 
 
-void addBill(){
-	Bill bill;
-	time_t rawtime;
-    struct tm * timeinfo;
-    time (&rawtime);
-	ofstream file("bills.dat",ios::binary | ios::app);
-	if (!file){
-		cerr<<"No se pudo abrir el archivo product.dat";
-		return ;
-	}
-	cout << "Ingresa el ID (debe ser unico): ";
-    cin >> bill.id;
-    
-    if (!checkId(bill.id)) {
-        cerr << "El ID ya existe. Intenta con otro ID." << endl;
-        return;
-    }
-    bill.date=localtime (&rawtime);
-    //addProductBill();
-    cout<<"Tiene entrega a domicilio?(1 para si, 0 para no)";
-    cin>>bill.delivery;
-	
-	file.write(reinterpret_cast<const char*>(&bill), sizeof(Bill));
-	file.close();
-	cout<<"Producto ingresado correctamente\n";
-	productMenu();
-}
-
 void billMenu(){
 	int x;
 	cout<<"Este es el menu de manejo de las facturas, ingresa un valor del 0 al tin segun lo que desees hacer";
