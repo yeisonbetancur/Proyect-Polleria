@@ -19,7 +19,7 @@ bool discountCheck(int x){
         return true;
     }else return false;
 }
-
+`
 bool checkId(const char* id) {
     ifstream archivo("products.dat", ios::binary);
     if (!archivo) {

@@ -1,12 +1,8 @@
-#ifndef AUXF
+#ifndef PROD
 
-#define AUXF
+#define PROD
+#include"auxfunc.h"
 
-struct Product{
-	char id[20];
-	char name[30];
-	double price;
-};
 Product searchProductByID(const char* id);
 void readProductById();
 void addProduct();

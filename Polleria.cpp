@@ -1,17 +1,12 @@
 
-#include"auxfunc.cpp"
+#include"auxfunc.h"
 #include"Products.cpp"
+#include"Bills.h"
 using namespace std;
 
 
 
 
-struct Expense{
-	char id[20];
-	char name[30];
-	double price;
-	tm* date;
-};
 
 int main();
 void productMenu();
@@ -47,6 +42,9 @@ void billMenu(){
 	cin>>x;
 	switch(x){
 		case 1: addBill();break;
+		case 2: readBillById();break;
+		case 3: editBill();break;
+		case 0: break;
 	}
 }
 
@@ -64,7 +62,7 @@ int main(){
 	cin>>x;
 	switch(x){
 		case 0: cout<<"Se ha cerrado con exito";return 0;
-		//case 1: billMenu();
+		case 1: billMenu();
 		case 2: productMenu();break;
 		default:cout<<"Ingresa un valor valido\n";main();
 	}

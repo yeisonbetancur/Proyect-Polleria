@@ -1,8 +1,7 @@
 
 #include"auxfunc.cpp"
 #include"Products.cpp"
-#include"auxfunc.h"
-
+#include"Bills.h"
 using namespace std;
 
 
@@ -51,7 +50,7 @@ void addBill(){
         cerr << "El ID ya existe. Intenta con otro ID." << endl;
         cin >> bill.id;
     }
-    bill.date=localtime (&rawtime);
+    bill.date=*localtime (&rawtime);
     bill = addProductBill(bill);
     cout<<"Tiene entrega a domicilio?(1 para si, 0 para no) ";
     cin>>bill.delivery;
@@ -75,7 +74,7 @@ void addBill(){
 
 }
 
-Bill searchBillById(const char* id[]){
+Bill searchBillById(const char* id){
     Bill bill={};
     ifstream archivo("bills.dat", ios::binary);
     if (!archivo) {
@@ -93,18 +92,144 @@ Bill searchBillById(const char* id[]){
     return bill;
 }
 
-void readProductById(){
+void readBillById(){
   	char id[20];
   	cout<<"Ingresa el ID ";
   	cin.ignore(numeric_limits<streamsize>::max(), '\n');
   	cin.getline(id,20);
   	Bill bill=searchBillById(id);
-  	if(product.id[0] != '\0'&& strcmp(bill.id, id)==0){
+  	if(bill.id[0] != '\0'&& strcmp(bill.id, id)==0){
     	cout <<"\nProducto encontrado:\n";
             cout <<"ID: "<<bill.id<<"\n";
-            cout <<"Fecha: "<<(1900+bill.date.tm_year)<<"/"<<bill.date.tm_mon<<"/"<<bill.date.tm_mday<<"/"<<bill.date.tm_hour<<"/"<<bill.date.tm_min<<"/"<<bill.date.tm_sec<<"\n";
-            cout <<"Precio: $"<<product.price<<"\n";
+            cout <<"Fecha: "<<(1900+bill.date.tm_year)<<"/"<<bill.date.tm_mon+1<<"/"<<bill.date.tm_mday<<"/"<<bill.date.tm_hour<<"/"<<bill.date.tm_min<<"/"<<bill.date.tm_sec<<"\n";
+            cout <<"Precio: $"<<bill.totalPrice<<"\n";
         }else{
         	cout<<"No se encontro el producto. con id; "<<id;
 		}
 	}
+
+    #include <iostream>
+#include <fstream>
+#include <cstring>
+#include "auxfunc.h"
+
+using namespace std;
+
+
+
+// Función para editar una factura en el archivo "bills.dat"
+void editBillById(const char* id) {
+    Bill bill = searchBillById(id);  // Busca la factura por ID
+    
+    // Verifica si la factura existe (asumiendo que una factura vacía tiene `id[0] == '\0'`)
+    if (bill.id[0] == '\0') {
+        cerr << "No se encontró ninguna factura con el ID: " << id << endl;
+        return;
+    }
+
+    // Mostrar los detalles actuales de la factura
+    cout << "\nFactura encontrada:\n";
+    cout << "ID: " << bill.id << "\n";
+    cout << "Fecha: " << (1900 + bill.date.tm_year) << "/" 
+         << bill.date.tm_mon << "/" << bill.date.tm_mday << "\n";
+    cout << "Precio actual: $" << bill.totalPrice << "\n";
+    cout << "¿Deseas cambiar la entrega a domicilio? (1 para sí, 0 para no): ";
+    cin >> bill.delivery;
+
+    // Si hay entrega a domicilio, solicita la dirección
+    if (bill.delivery) {
+        cout << "Ingresa la nueva dirección de entrega: ";
+        cin.ignore();
+        cin.getline(bill.direction, 20);
+    } else {
+        strcpy(bill.direction, "");  // Vacía el campo si no hay entrega
+    }
+
+    // Solicita el nuevo descuento
+    cout << "Ingresa el nuevo descuento (1-99): ";
+    cin >> bill.discount;
+    while (!discountCheck(bill.discount)) {
+        cout << "Descuento inválido. Ingresa un valor entre 1 y 99: ";
+        cin >> bill.discount;
+    }
+
+    // Calcula y actualiza el total de la factura
+    bill.totalPrice = calculateTotal(bill);
+
+    // Reabre el archivo en modo de lectura y escritura para sobrescribir
+    fstream file("bills.dat", ios::binary | ios::in | ios::out);
+    if (!file) {
+        cerr << "Error al abrir el archivo para la edición." << endl;
+        return;
+    }
+
+    // Busca la posición de la factura en el archivo para sobrescribirla
+    Bill tempBill;
+    while (file.read(reinterpret_cast<char*>(&tempBill), sizeof(Bill))) {
+        if (strcmp(tempBill.id, id) == 0) {
+            file.seekp(-static_cast<streamoff>(sizeof(Bill)), ios::cur);
+            file.write(reinterpret_cast<const char*>(&bill), sizeof(Bill));
+            cout << "Factura actualizada con éxito.\n";
+            file.close();
+            return;
+        }
+    }
+
+    cerr << "Error: No se pudo encontrar la factura para actualizar." << endl;
+    file.close();
+}
+
+
+void editBill(){
+    char id[20];
+    cout<<"\nIngresa el id de la factura a editar: ";
+    cin.getline(id,20);
+    editBillById(id);
+}
+
+void deleteBillById(const char* id) {
+    ifstream archivo("bills.dat", ios::binary);
+    if (!archivo) {
+        cerr << "Error al abrir el archivo de facturas." << endl;
+        return;
+    }
+
+    ofstream archivoTemp("temp.dat", ios::binary);
+    if (!archivoTemp) {
+        cerr << "Error al crear el archivo temporal." << endl;
+        archivo.close();
+        return;
+    }
+
+    Bill bill;
+    bool found = false;
+
+    // Leer y copiar facturas que no coincidan con el ID al archivo temporal
+    while (archivo.read(reinterpret_cast<char*>(&bill), sizeof(Bill))) {
+        if (strcmp(bill.id, id) != 0) {
+            archivoTemp.write(reinterpret_cast<const char*>(&bill), sizeof(Bill));
+        } else {
+            found = true;
+        }
+    }
+
+    archivo.close();
+    archivoTemp.close();
+
+    // Reemplazar el archivo original solo si la factura se encontró y eliminó
+    if (found) {
+        remove("bills.dat");                // Eliminar archivo original
+        rename("temp.dat", "bills.dat");     // Renombrar archivo temporal
+        cout << "Factura eliminada con éxito." << endl;
+    } else {
+        remove("temp.dat");  // Eliminar el archivo temporal si no se encontró el ID
+        cerr << "No se encontró ninguna factura con el ID: " << id << endl;
+    }
+}
+
+void deleteBill(){
+char id[20];
+cout<<"\nIngresa el id de la factura a eliminar: ";
+cin.getline(id,20);
+deleteBillById(id);
+}
