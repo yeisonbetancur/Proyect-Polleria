@@ -1,11 +1,9 @@
-#include<iostream>
 #include<fstream>
-#include<ctime>
-#include<cstring>
 #include<vector>
 #include<algorithm>
 #include <limits>
 #include"auxfunc.h"
+#include"products.h"
 using namespace std;
 
 bool checkBool(int x){
@@ -19,7 +17,7 @@ bool discountCheck(int x){
         return true;
     }else return false;
 }
-`
+
 bool checkId(const char* id) {
     ifstream archivo("products.dat", ios::binary);
     if (!archivo) {

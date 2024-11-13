@@ -1,12 +1,4 @@
-#include "auxfunc.h"
-#include "auxfunc.cpp"
-#include<iostream>
-#include<fstream>
-#include<ctime>
-#include<cstring>
-#include<vector>
-#include<algorithm>
-#include <limits>
+#include"auxfunc.h"
 using namespace std;
 
 Product searchProductByID(const char* id) {

@@ -3,12 +3,12 @@
 #define PROD
 #include"auxfunc.h"
 
-Product searchProductByID(const char* id);
+Product searchProductByID(const char*);
 void readProductById();
 void addProduct();
 void modifyProductByID();
-bool loadProducts(Product products[], int& productCount);
-void displayProducts(Product products[], int productCount);
-void sortProducts(Product products[], int productCount);
+bool loadProducts(Product[], int& );
+void displayProducts(Product[], int );
+void sortProducts(Product[], int );
 void listProducts();
 #endif

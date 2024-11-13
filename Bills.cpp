@@ -1,7 +1,6 @@
+#include"auxfunc.h"
 
-#include"auxfunc.cpp"
-#include"Products.cpp"
-#include"Bills.h"
+
 using namespace std;
 
 
@@ -108,26 +107,14 @@ void readBillById(){
 		}
 	}
 
-    #include <iostream>
-#include <fstream>
-#include <cstring>
-#include "auxfunc.h"
-
-using namespace std;
-
-
-
-// Función para editar una factura en el archivo "bills.dat"
 void editBillById(const char* id) {
-    Bill bill = searchBillById(id);  // Busca la factura por ID
+    Bill bill = searchBillById(id);  
     
-    // Verifica si la factura existe (asumiendo que una factura vacía tiene `id[0] == '\0'`)
     if (bill.id[0] == '\0') {
         cerr << "No se encontró ninguna factura con el ID: " << id << endl;
         return;
     }
 
-    // Mostrar los detalles actuales de la factura
     cout << "\nFactura encontrada:\n";
     cout << "ID: " << bill.id << "\n";
     cout << "Fecha: " << (1900 + bill.date.tm_year) << "/" 
@@ -136,16 +123,15 @@ void editBillById(const char* id) {
     cout << "¿Deseas cambiar la entrega a domicilio? (1 para sí, 0 para no): ";
     cin >> bill.delivery;
 
-    // Si hay entrega a domicilio, solicita la dirección
     if (bill.delivery) {
         cout << "Ingresa la nueva dirección de entrega: ";
         cin.ignore();
         cin.getline(bill.direction, 20);
     } else {
-        strcpy(bill.direction, "");  // Vacía el campo si no hay entrega
+        strcpy(bill.direction, "");  
     }
 
-    // Solicita el nuevo descuento
+
     cout << "Ingresa el nuevo descuento (1-99): ";
     cin >> bill.discount;
     while (!discountCheck(bill.discount)) {
@@ -153,10 +139,8 @@ void editBillById(const char* id) {
         cin >> bill.discount;
     }
 
-    // Calcula y actualiza el total de la factura
     bill.totalPrice = calculateTotal(bill);
 
-    // Reabre el archivo en modo de lectura y escritura para sobrescribir
     fstream file("bills.dat", ios::binary | ios::in | ios::out);
     if (!file) {
         cerr << "Error al abrir el archivo para la edición." << endl;
