@@ -6,6 +6,7 @@
 #include<vector>
 #include<algorithm>
 #include <limits>
+#include<stdio.h>
 
 using namespace std;
 
@@ -55,12 +56,25 @@ void polleria(){
     cout << "                                                                  " << endl;
 }
 
+bool isValidId(const char* id) {
+    for (int i = 0; i < strlen(id); ++i) {
+        if (!isalnum(id[i])) {  // Comprobar que el caracter sea alfanumérico
+            return false;
+        }
+    }
+    return true;
+}
+
 bool checkId(const char* id) {
     ifstream archivo("products.dat", ios::binary);
     if (!archivo) {
         cerr << "Error al abrir el archivo." << endl;
         return false;
     }
+if (strlen(id) == 0 || !isValidId(id)){
+    	cout << "ERROR: El ID no es válido. Debe ser alfanumerico y no estar vacío.\n";
+        return false;	
+		}
 
     Product product;
     while (archivo.read(reinterpret_cast<char*>(&product), sizeof(Product))) {
@@ -73,6 +87,9 @@ bool checkId(const char* id) {
     archivo.close();
     return true;
 }
+
+
+
 bool checkBillId(const char* id) {
     ifstream archivo("bills.dat", ios::binary);
     if (!archivo) {
@@ -80,8 +97,13 @@ bool checkBillId(const char* id) {
         return false;
     }
 
+        if (strlen(id) == 0 || !isValidId(id)){
+    	cout << "ERROR: El ID no es válido. Debe ser alfanumerico y no estar vacío.\n";
+        return false;	
+		}
     Bill bill;
     while (archivo.read(reinterpret_cast<char*>(&bill), sizeof(Bill))) {
+    	
         if (strcmp(bill.id, id) == 0) {
             cerr<<"El ID ya esta registrado";
             return false;
@@ -113,6 +135,7 @@ bool checkExpenseId(const char* id) {
 
 Product searchProductByID(const char* id) {
     Product product={};
+     strcpy(product.id, "-1");
     ifstream archivo("products.dat", ios::binary);
     if (!archivo) {
         cerr << "Error al abrir el archivo." << endl;
@@ -126,6 +149,7 @@ Product searchProductByID(const char* id) {
         }
     }
     archivo.close();
+     strcpy(product.id, "-1");
     return product;
 }
 
@@ -288,14 +312,7 @@ void listProducts(){
     return ;
 }
 
-bool isValidProductId(const char* id) {
-    for (int i = 0; i < strlen(id); ++i) {
-        if (!isalnum(id[i])) {  // Comprobar que el caracter sea alfanumérico
-            return false;
-        }
-    }
-    return true;
-}
+
 
 // Función para agregar productos a la factura
 Bill addProductBill(Bill bill) {
@@ -303,15 +320,22 @@ Bill addProductBill(Bill bill) {
     bool pending = true;
     
     while (pending && i < 20) { 
-        cout << "Esta es la lista de los productos en el sistema: ";
+        cout << "\nEsta es la lista de los productos en el sistema: ";
         listProducts();  // Asumiendo que esta función muestra los productos disponibles.
         cout << "\nIngresa el id del producto a ingresar: ";
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cin.getline(bill.productId[i], 20);
         
+        Product product=searchProductByID(bill.productId[i]);
+        cout << "ID encontrado en archivo: " << product.id << endl;
+        if(product.id=="-1"){
+        	cout<<"ERROR; El Id no es de ningun producto registrado";
+        	continue;
+		}
+        
         // Verificar si el ID del producto es válido
-        if (strlen(bill.productId[i]) == 0 || !isValidProductId(bill.productId[i])) {
-            cout << "ERROR: El ID del producto no es válido. Debe ser alfanumérico y no estar vacío.\n";
+        if (strlen(bill.productId[i]) == 0 || !isValidId(bill.productId[i])) {
+            cout << "ERROR: El ID del producto no es válido. Debe ser alfanumerico y no estar vacío.\n";
             continue;
         }
 
@@ -324,7 +348,7 @@ Bill addProductBill(Bill bill) {
             continue;
         }
 
-        cout << "¿Deseas agregar otro producto? (0 para no, 1 para sí): ";
+        cout << "Deseas agregar otro producto? (0 para no, 1 para sí): ";
         bool cCheck = true;
         while (cCheck) {
             cin >> bcheck;
@@ -354,49 +378,50 @@ void addBill() {
         return;
     }
 
-    cout << "Ingresa el ID (debe ser único): ";
+    cout << "Ingresa el ID (debe ser unico): ";
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
     cin.getline(bill.id, 20);
 
     while (!checkBillId(bill.id)) {
-        cerr << "El ID ya existe. Intenta con otro ID: ";
+        cerr << "\nEl ID ya existe. Intenta con otro ID: ";
         cin.getline(bill.id, 20); // Evitar que el buffer anterior contamine la nueva entrada
     }
 
     bill.date = *localtime(&rawtime);
     bill = addProductBill(bill);
 
-    cout << "¿Tiene entrega a domicilio? (1 para sí, 0 para no): ";
+    cout << "Tiene entrega a domicilio? (1 para si, 0 para no): ";
     while (!(cin >> bill.delivery) || !checkBool(bill.delivery)) { // Validar booleano
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "ERROR: Ingresa 1 para SÍ o 0 para NO: ";
+        cout << "\nERROR: Ingresa 1 para Si o 0 para NO: ";
     }
 
     if (bill.delivery == 1) {
-        cout << "\n¿Cuál es la dirección del domicilio? ";
+        cout << "\nCual es la dirección del domicilio? ";
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cin.getline(bill.direction, 20);
     }
 
-    cout << "\n¿La venta tiene descuento? Ingresa un valor entre 0 y 99: ";
+    cout << "\nLa venta tiene descuento? Ingresa un valor entre 0 y 99: ";
     while (!(cin >> bill.discount) || !discountCheck(bill.discount)) {
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "ERROR: Ingresa un descuento válido (0-99): ";
+        cout << "ERROR: Ingresa un descuento valido (0-99): ";
     }
 
     bill.totalPrice = calculateTotal(bill);
     file.write(reinterpret_cast<const char*>(&bill), sizeof(Bill));
     file.close();
-    cout << "Factura realizada con éxito\n";
+    cout << "Factura realizada con exito\n";
 }
 
 Bill searchBillById(const char* id){
     Bill bill={};
+    
     ifstream archivo("bills.dat", ios::binary);
     if (!archivo) {
-        cerr << "Error al abrir el archivo." << endl;
+        cerr << "\nError al abrir el archivo." << endl;
         return bill ;
     }
 
@@ -422,14 +447,14 @@ void readBillById(){
             cout <<"Fecha: "<<(1900+bill.date.tm_year)<<"/"<<bill.date.tm_mon+1<<"/"<<bill.date.tm_mday<<"\n";
             cout <<"Precio: $"<<bill.totalPrice<<"\n";
         }else{
-        	cout<<"No se encontro el producto. con id; "<<id;
+        	cout<<"\nNo se encontro el producto. con id: "<<id;
 		}
 	}
 
 void editBillById(const char* id) {
     Bill bill = searchBillById(id);  
     if (bill.id[0] == '\0') {
-        cerr << "No se encontro ninguna factura con el ID: " << id << endl;
+        cerr << "\nNo se encontro ninguna factura con el ID: " << id << endl;
         return;
     }
     cout << "\nFactura encontrada:\n";
@@ -437,16 +462,16 @@ void editBillById(const char* id) {
     cout << "Fecha: " << (1900 + bill.date.tm_year) << "/" 
          << bill.date.tm_mon << "/" << bill.date.tm_mday << "\n";
     cout << "Precio actual: $" << bill.totalPrice << "\n";
-    cout << "¿Deseas cambiar la entrega a domicilio? (1 para sí, 0 para no): ";
+    cout << "\nDeseas cambiar la entrega a domicilio? (1 para sí, 0 para no): ";
     cin >> bill.delivery;
     if (bill.delivery) {
-        cout << "Ingresa la nueva dirección de entrega: ";
+        cout << "\nIngresa la nueva dirección de entrega: ";
         cin.ignore();
         cin.getline(bill.direction, 20);
     } else {
         strcpy(bill.direction, "");  
     }
-    cout << "Ingresa el nuevo descuento (1-99): ";
+    cout << "\nIngresa el nuevo descuento (1-99): ";
     cin >> bill.discount;
     while (!discountCheck(bill.discount)) {
         cout << "Descuento inválido. Ingresa un valor entre 1 y 99: ";
