@@ -798,7 +798,7 @@ void checkAndPrintBillsOnDate(){
     int billCount=0;
     loadBills(bills,billCount);
     int year,month,day;
-    cout<<"Ingresa el año: ";
+    cout<<"Ingresa el agnio: ";
     cin>>year;
     cout<<"Ingresa el mes: ";
     cin>>month;
